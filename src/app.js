@@ -57,18 +57,40 @@ app.delete("/user", async (req, res) => {
 });
 
 // Update user details in DB
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const data = req.body;
-  console.log("Data to be updated :-", data);
+
   try {
-    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
-      returnDocument: "after",
+    const ALLOWED_UPDATES = ["photoUrl", "about", "skills", "gender", "age"];
+
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+
+    if (!isUpdateAllowed) {
+      throw new Error("Updates not allowed");
+    }
+
+    if(data?.skills.length > 10){
+      throw new Error("You can add up to 10 skills only");
+    }
+
+    const user = await User.findByIdAndUpdate(userId, data, {
+      new: true,
       runValidators: true,
     });
-    res.send("user updated successfully");
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    res.send({
+      message: "User updated successfully",
+      data: user,
+    });
   } catch (err) {
-    res.status(400).send("Error updating user" + err.message);
+    res.status(400).send("Error updating user: " + err.message);
   }
 });
 
