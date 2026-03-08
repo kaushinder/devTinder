@@ -5,6 +5,7 @@ const User = require("./models/user");
 
 app.use(express.json());
 
+// post request to create a new user in DB
 app.post("/signup", async (req, res) => {
   // creating a new instance of the User model
   const user = new User(req.body);
@@ -46,12 +47,11 @@ app.get("/feed", async (req, res) => {
 // Delete user from DB
 app.delete("/user", async (req, res) => {
   const userId = req.body.userId;
-  try{
+  try {
     //  const user = await User.findByIdAndDelete({_id: userId});
     const user = await User.findByIdAndDelete(userId);
     res.send("User deleted successfully");
-  }
-  catch(err){
+  } catch (err) {
     res.status(400).send("Error deleting user" + err.message);
   }
 });
@@ -60,12 +60,14 @@ app.delete("/user", async (req, res) => {
 app.patch("/user", async (req, res) => {
   const userId = req.body.userId;
   const data = req.body;
-  console.log("Data to be updated :-", data, );
-  try{
-    const user = await User.findByIdAndUpdate({ _id: userId }, data, {returnDocument: "before"});
-    res.send(user);
-  }
-  catch(err){
+  console.log("Data to be updated :-", data);
+  try {
+    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+      returnDocument: "after",
+      runValidators: true,
+    });
+    res.send("user updated successfully");
+  } catch (err) {
     res.status(400).send("Error updating user" + err.message);
   }
 });
