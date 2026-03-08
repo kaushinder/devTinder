@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema(
   {
@@ -17,10 +18,20 @@ const userSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
       trim: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Invalid email address: " + value);
+        }
+      },
     },
     password: {
       type: String,
       required: true,
+      validate(value) {
+        if(!validator.isStrongPassword(value)){
+            throw new Error("Your password is not strong: " + value);
+        }
+      }
     },
     age: {
       type: Number,
@@ -38,6 +49,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default:
         "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Invalid photo URL: " + value);
+        }
+      },
     },
     about: {
       type: String,
@@ -47,9 +63,9 @@ const userSchema = new mongoose.Schema(
       type: [String],
     },
   },
-  { 
-    timestamps: true
- },
+  {
+    timestamps: true,
+  },
 );
 
 module.exports = mongoose.model("User", userSchema);
