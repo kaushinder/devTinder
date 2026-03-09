@@ -4,8 +4,11 @@ const app = express();
 const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
+const cookiesParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 app.use(express.json());
+app.use(cookiesParser());
 
 // Signup Api using POST
 app.post("/signup", async (req, res) => {
@@ -36,26 +39,45 @@ app.post("/signup", async (req, res) => {
 
 // login Api using POST
 app.post("/login", async (req, res) => {
-  try{
-    const {emailId, password} = req.body;
+  try {
+    const { emailId, password } = req.body;
 
     const user = await User.findOne({ emailId: emailId });
-    if(!user){
+    if (!user) {
       throw new Error("Invalid credentials");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if(isPasswordValid){
+    if (isPasswordValid) {
+      // create a JWT token and send it to the client
+      const token = await jwt.sign({ _id: user._id }, "DEV@Tinder$790");
+      console.log("Generated token: ", token);
+
+      // Add the token to cookie and send the response back to the user
+      res.cookie("token", token);
       res.send("Login successful!!!");
-    }
-    else{
+    } else {
       throw new Error("Invalid credentials");
     }
-  }
-  catch(err){
+  } catch (err) {
     res.status(400).send("Error logging in user: " + err.message);
   }
+});
+
+// Get user profile details
+app.get("/profile", async (req, res) => {
+  const cookies = req.cookies;
+
+  const { token } = cookies;
+  
+  // Validate my token
+  const decodedMessage = await jwt.verify(token, "DEV@Tinder$790");
+
+  const { _id } = decodedMessage;
+  console.log("Logged In user is: " + _id);
+
+  res.send("Reading Cookie");
 });
 
 // Get user by email
