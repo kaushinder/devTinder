@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 
 app.use(express.json());
 
-// post request to create a new user in DB
+// Signup Api using POST
 app.post("/signup", async (req, res) => {
   // Validation of data
   validateSignUpData(req);
@@ -34,7 +34,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-// login Api
+// login Api using POST
 app.post("/login", async (req, res) => {
   try{
     const {emailId, password} = req.body;
