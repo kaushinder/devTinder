@@ -6,7 +6,9 @@ const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const cookiesParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 
+app.use(cors());
 app.use(express.json());
 app.use(cookiesParser());
 
@@ -70,7 +72,7 @@ app.get("/profile", async (req, res) => {
   const cookies = req.cookies;
 
   const { token } = cookies;
-  
+
   // Validate my token
   const decodedMessage = await jwt.verify(token, "DEV@Tinder$790");
 
